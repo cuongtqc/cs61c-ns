@@ -68,10 +68,15 @@ class ReflexAgent(Agent):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     print "newpos",newPos
+    
     print "gs",newGhostStates
+    
     print "nf",newFood
+    
     print "st",newScaredTimes
-    cake = False
+    
+    cake = Falsetto
+    blah = 1
 
     "*** YOUR CODE HERE   ***"
     ghostDistances = []
