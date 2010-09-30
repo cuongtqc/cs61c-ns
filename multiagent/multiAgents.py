@@ -71,7 +71,7 @@ class ReflexAgent(Agent):
     print "gs",newGhostStates
     print "nf",newFood
     print "st",newScaredTimes
-      
+    cake = False
 
     "*** YOUR CODE HERE   ***"
     ghostDistances = []
