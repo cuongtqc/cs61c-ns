@@ -69,13 +69,14 @@ class ReflexAgent(Agent):
 
     print "newpos",newPos
     
-    print "gs",newGhostStates
+    for gs in newGhostStates:
+        print "gs",gs
     
     print "nf",newFood
     
     print "st",newScaredTimes
     
-    cake = Falsetto
+    cake = False
     blah = 1
 
     "*** YOUR CODE HERE   ***"
