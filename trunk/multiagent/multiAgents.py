@@ -129,11 +129,6 @@ class MultiAgentSearchAgent(Agent):
     self.evaluationFunction = util.lookup(evalFn, globals())
     self.depth = int(depth)
     self.agentCount = 0
-    
-class MinimaxAgent(MultiAgentSearchAgent):
-  """
-    Your minimax agent (question 2)
-  """
 
   def result(self,state,agent,action):
     return state.generateSuccessor(agent,action)
@@ -147,6 +142,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
     else:
         return False
 
+
+    
+class MinimaxAgent(MultiAgentSearchAgent):
+  """
+    Your minimax agent (question 2)
+  """
   def minimax(self,state,agent,depth):
     #print "minimax"," agent:",agent," depth:",depth
     #print state
@@ -207,24 +208,91 @@ class MinimaxAgent(MultiAgentSearchAgent):
     for action in actions:
         val = self.minimax(self.result(state,agent,action),agent+1,depth+1)
         actionDict[val] = action
-    #selectedActions = [a[1] for a in actionTuples]
     #print actionDict,max(actionDict),min(actionDict),actionDict.keys(),max(actionDict.keys())
     #print "SELECTED",max(actionDict)
     return actionDict[max(actionDict)]
-    #util.raiseNotDefined()
     
+
+class abVal():
+    def __init__(self,value,action):
+        self.action = action
+        self.value = value
+    
+    def __repr__(self):
+        return self.action + ": " + str(self.value)
+    
+    def __cmp__(self,other):
+        if self.value == other.value:
+            return 0
+        elif self.value > other.value:
+            return 1
+        else:
+            return -1
+        
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
     Your minimax agent with alpha-beta pruning (question 3)
   """
+  
+  def alphabeta(self,state,agent,depth,action,alpha,beta):
+    #print "alphabeta"," agent:",agent," depth:",depth," alpha:",alpha," beta:",beta
+    #print state
+    retval = []
+    if agent == self.agentCount:
+        agent = self.index
+    if self.terminalTest(state,depth):
+        retval = abVal(self.utility(state),action)
+    elif agent == self.index:
+        retval = self.maxval(state,agent,depth,alpha,beta)
+    else:
+        retval = self.minval(state,agent,depth,alpha,beta)
+    #print "alphabeta returns:",retval," agent:",agent
+    return retval
+  
+  def maxval(self,state,agent,depth,alpha,beta):
+    v = abVal(float("-inf"),Directions.STOP)
+    actions = state.getLegalActions(agent)
+    actions.remove(Directions.STOP)
+    for action in actions:
+        #print "max Action...",v
+        tempv = self.alphabeta(self.result(state,agent,action),agent+1,depth+1,action,alpha,beta)
+        tempv.action = action
+        v = max(v,tempv)
+        #print v,"end max action"
+        if v.value >= beta:
+            return v
+        alpha = max (alpha,v.value)          
+    return v
+  
+  def minval(self,state,agent,depth,alpha,beta):
+    v = abVal(float("inf"),Directions.STOP)
+    for action in state.getLegalActions(agent):
+        #print "min Action...",v
+        tempv = self.alphabeta(self.result(state,agent,action),agent+1,depth+1,action,alpha,beta) 
+        tempv.action = action
+        v = min(v,tempv)
+        #print v,"end min action"
+        if v.value <= alpha:
+            return v
+        beta = min(beta,v.value)          
+    return v
 
   def getAction(self, gameState):
     """
       Returns the minimax action using self.depth and self.evaluationFunction
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    state = gameState
+    self.agentCount = state.getNumAgents()
+    depth = 0
+    agent = self.index
+    alpha = float("-inf")
+    beta = float("inf")
+    action = Directions.STOP
+    v = self.alphabeta(state,agent,depth,action,alpha,beta)
+    #print "SELECTING",v
+    return v.action
+    
 class ExpectimaxAgent(MultiAgentSearchAgent):
   """
     Your expectimax agent (question 4)
