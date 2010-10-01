@@ -67,22 +67,37 @@ class ReflexAgent(Agent):
     newGhostStates = successorGameState.getGhostStates()
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-    print "newpos",newPos
-    
-    for gs in newGhostStates:
-        print "gs",gs
-    
-    print "nf",newFood
-    
-    print "st",newScaredTimes
-    
-    cake = False
-    blah = 1
+    heuristic = 0
 
-    "*** YOUR CODE HERE   ***"
-    ghostDistances = []
+    #print "newpos",newPos
     
-    return successorGameState.getScore()
+    ghostDistances = []
+    for gs in newGhostStates:
+        ghostDistances += [manhattanDistance(gs.getPosition(),newPos)]
+    #print "ghostDist",ghostDistances
+    
+    foodList = newFood.asList()
+    
+    foodDistances = []
+    for f in foodList:
+        foodDistances += [manhattanDistance(newPos,f)]
+    #print "food",foodDistances
+
+    inverseFoodDist = 0
+    if len(foodDistances) > 0:
+        inverseFoodDist = 1.0/(min(foodDistances))
+    
+    #print "ifd",inverseFoodDist        
+    
+   #print "st",newScaredTimes
+    
+    heuristic = (min(ghostDistances)*((inverseFoodDist)**2))
+    #heuristic += min(ghostDistances)*2
+    heuristic += successorGameState.getScore()#/len(foodDistances)
+    #heuristic *= 1.0/len(foodDistances)
+    #heuristic -= inverseFoodDist**2
+    #print "heuristic:",heuristic
+    return heuristic
 
 def scoreEvaluationFunction(currentGameState):
   """
@@ -113,12 +128,54 @@ class MultiAgentSearchAgent(Agent):
     self.index = 0 # Pacman is always agent index 0
     self.evaluationFunction = util.lookup(evalFn, globals())
     self.depth = int(depth)
-
+    self.agentCount = 0
+    
 class MinimaxAgent(MultiAgentSearchAgent):
   """
     Your minimax agent (question 2)
   """
 
+  def result(self,state,agent,action):
+    return state.generateSuccessor(agent,action)
+
+  def utility(self,state):
+    return self.evaluationFunction(state)
+
+  def terminalTest(self,state,depth):
+    if depth == (self.depth*self.agentCount) or state.isWin() or state.isLose():
+        return True
+    else:
+        return False
+
+  def minimax(self,state,agent,depth):
+    #print "minimax"," agent:",agent," depth:",depth
+    #print state
+    retval = 0
+    if agent == self.agentCount:
+        agent = self.index
+    if self.terminalTest(state,depth):
+        retval =  self.utility(state)
+    elif agent == self.index:
+        retval = self.maxval(state,agent,depth)
+    else:
+        retval = self.minval(state,agent,depth)
+    #print "minimax returns:",retval," agent:",agent
+    return retval
+  
+  def maxval(self,state,agent,depth):
+    v = float("-inf")
+    actions = state.getLegalActions(agent)
+    actions.remove(Directions.STOP)
+    for action in actions:
+        v = max(v,self.minimax(self.result(state,agent,action),agent+1,depth+1))          
+    return v
+  
+  def minval(self,state,agent,depth):
+    v = float("inf")
+    for action in state.getLegalActions(agent):
+        v = min(v,self.minimax(self.result(state,agent,action),agent+1,depth+1))          
+    return v
+    
   def getAction(self, gameState):
     """
       Returns the minimax action from the current gameState using self.depth
@@ -140,8 +197,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns the total number of agents in the game
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    state = gameState
+    self.agentCount = state.getNumAgents()
+    depth = 0
+    agent = self.index
+    actionDict = {}
+    actions = state.getLegalActions(agent)
+    actions.remove(Directions.STOP)
+    for action in actions:
+        val = self.minimax(self.result(state,agent,action),agent+1,depth+1)
+        actionDict[val] = action
+    #selectedActions = [a[1] for a in actionTuples]
+    #print actionDict,max(actionDict),min(actionDict),actionDict.keys(),max(actionDict.keys())
+    #print "SELECTED",max(actionDict)
+    return actionDict[max(actionDict)]
+    #util.raiseNotDefined()
+    
 class AlphaBetaAgent(MultiAgentSearchAgent):
   """
     Your minimax agent with alpha-beta pruning (question 3)
