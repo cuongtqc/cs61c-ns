@@ -325,9 +325,11 @@ def betterEvaluationFunction(currentGameState):
      newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
     
      heuristic = 0
-    
-     #print "newpos",newPos
      
+     for st in newScaredTimes:
+         heuristic += st
+         #print "st",st
+         
      ghostDistances = []
      for gs in newGhostStates:
          ghostDistances += [manhattanDistance(gs.getPosition(),newPos)]
@@ -335,8 +337,24 @@ def betterEvaluationFunction(currentGameState):
      
      foodList = newFood.asList()
      
+     wallList = currentGameState.getWalls().asList()
+     
+     emptyFoodNeighbors = 0
      foodDistances = []
+     
+     def foodNeighbors(foodPos):
+         foodNeighbors = []
+         foodNeighbors.append((foodPos[0]-1,foodPos[1]))
+         foodNeighbors.append((foodPos[0],foodPos[1]-1))
+         foodNeighbors.append((foodPos[0],foodPos[1]+1))
+         foodNeighbors.append((foodPos[0]+1,foodPos[1]))
+         return foodNeighbors
+     
      for f in foodList:
+         neighbors = foodNeighbors(f)
+         for fn in neighbors:
+             if fn not in wallList and fn not in foodList:
+                 emptyFoodNeighbors += 1
          foodDistances += [manhattanDistance(newPos,f)]
      #print "food",foodDistances
     
@@ -348,9 +366,10 @@ def betterEvaluationFunction(currentGameState):
      
     #print "st",newScaredTimes
      
-     heuristic = (min(ghostDistances)*((inverseFoodDist**4)))
+     heuristic += (min(ghostDistances)*((inverseFoodDist**4)))
      #heuristic += min(ghostDistances)*2
-     heuristic += currentGameState.getScore()#/len(foodDistances)
+     heuristic += currentGameState.getScore()-(float(emptyFoodNeighbors)*4.5)
+     #print emptyFoodNeighbors,currentGameState.getScore(),currentGameState.getScore()-(float(emptyFoodNeighbors)*9),heuristic
      #heuristic *= 1.0/len(foodDistances)
      #heuristic -= inverseFoodDist**2
      #print "heuristic:",heuristic
