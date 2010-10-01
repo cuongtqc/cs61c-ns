@@ -348,7 +348,7 @@ def betterEvaluationFunction(currentGameState):
      
     #print "st",newScaredTimes
      
-     heuristic = (min(ghostDistances)*((inverseFoodDist)**2))
+     heuristic = (min(ghostDistances)*((inverseFoodDist**4)))
      #heuristic += min(ghostDistances)*2
      heuristic += currentGameState.getScore()#/len(foodDistances)
      #heuristic *= 1.0/len(foodDistances)
