@@ -293,30 +293,69 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     #print "SELECTING",v
     return v.action
     
-class ExpectimaxAgent(MultiAgentSearchAgent):
+class ExpectimaxAgent(MinimaxAgent):
   """
     Your expectimax agent (question 4)
   """
 
-  def getAction(self, gameState):
-    """
+  # def getAction(self, gameState):
+  """
       Returns the expectimax action using self.depth and self.evaluationFunction
 
       All ghosts should be modeled as choosing uniformly at random from their
       legal moves.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+  def minval(self,state,agent,depth):
+    v = 0
+    for action in state.getLegalActions(agent):
+        v += self.minimax(self.result(state,agent,action),agent+1,depth+1)          
+    return v/len(state.getLegalActions(agent))
 
 def betterEvaluationFunction(currentGameState):
-  """
-    Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
-    evaluation function (question 5).
-
-    DESCRIPTION: <write something here so we know what you did>
-  """
-  "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+     """
+      Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
+      evaluation function (question 5).
+    
+      DESCRIPTION: <write something here so we know what you did>
+     """
+     "*** YOUR CODE HERE ***"
+     newPos = currentGameState.getPacmanPosition()
+     newFood = currentGameState.getFood()
+     newGhostStates = currentGameState.getGhostStates()
+     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    
+     heuristic = 0
+    
+     #print "newpos",newPos
+     
+     ghostDistances = []
+     for gs in newGhostStates:
+         ghostDistances += [manhattanDistance(gs.getPosition(),newPos)]
+     #print "ghostDist",ghostDistances
+     
+     foodList = newFood.asList()
+     
+     foodDistances = []
+     for f in foodList:
+         foodDistances += [manhattanDistance(newPos,f)]
+     #print "food",foodDistances
+    
+     inverseFoodDist = 0
+     if len(foodDistances) > 0:
+         inverseFoodDist = 1.0/(min(foodDistances))
+     
+     #print "ifd",inverseFoodDist        
+     
+    #print "st",newScaredTimes
+     
+     heuristic = (min(ghostDistances)*((inverseFoodDist)**2))
+     #heuristic += min(ghostDistances)*2
+     heuristic += currentGameState.getScore()#/len(foodDistances)
+     #heuristic *= 1.0/len(foodDistances)
+     #heuristic -= inverseFoodDist**2
+     #print "heuristic:",heuristic
+     return heuristic
+  
 
 # Abbreviation
 better = betterEvaluationFunction
