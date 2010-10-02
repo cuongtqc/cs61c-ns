@@ -68,36 +68,43 @@ class ReflexAgent(Agent):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     heuristic = 0
+    
+    for st in newScaredTimes:
+        heuristic += st
+         
+	ghostDistances = []
+	for gs in newGhostStates:
+	 ghostDistances += [manhattanDistance(gs.getPosition(),newPos)]
 
-    #print "newpos",newPos
-    
-    ghostDistances = []
-    for gs in newGhostStates:
-        ghostDistances += [manhattanDistance(gs.getPosition(),newPos)]
-    #print "ghostDist",ghostDistances
-    
-    foodList = newFood.asList()
-    
-    foodDistances = []
-    for f in foodList:
-        foodDistances += [manhattanDistance(newPos,f)]
-    #print "food",foodDistances
+	foodList = newFood.asList()
 
-    inverseFoodDist = 0
-    if len(foodDistances) > 0:
-        inverseFoodDist = 1.0/(min(foodDistances))
-    
-    #print "ifd",inverseFoodDist        
-    
-   #print "st",newScaredTimes
-    
-    heuristic = (min(ghostDistances)*((inverseFoodDist)**2))
-    #heuristic += min(ghostDistances)*2
-    heuristic += successorGameState.getScore()#/len(foodDistances)
-    #heuristic *= 1.0/len(foodDistances)
-    #heuristic -= inverseFoodDist**2
-    #print "heuristic:",heuristic
-    return heuristic
+	wallList = currentGameState.getWalls().asList()
+
+	emptyFoodNeighbors = 0
+	foodDistances = []
+
+	def foodNeighbors(foodPos):
+		foodNeighbors = []
+		foodNeighbors.append((foodPos[0]-1,foodPos[1]))
+		foodNeighbors.append((foodPos[0],foodPos[1]-1))
+		foodNeighbors.append((foodPos[0],foodPos[1]+1))
+		foodNeighbors.append((foodPos[0]+1,foodPos[1]))
+		return foodNeighbors
+
+	for f in foodList:
+		neighbors = foodNeighbors(f)
+		for fn in neighbors:
+		 if fn not in wallList and fn not in foodList:
+			emptyFoodNeighbors += 1
+		foodDistances += [manhattanDistance(newPos,f)]
+
+	inverseFoodDist = 0
+	if len(foodDistances) > 0:
+		inverseFoodDist = 1.0/(min(foodDistances))
+     
+	heuristic += (min(ghostDistances)*((inverseFoodDist**4)))
+	heuristic += successorGameState.getScore()-(float(emptyFoodNeighbors)*4.5)
+	return heuristic
 
 def scoreEvaluationFunction(currentGameState):
   """
