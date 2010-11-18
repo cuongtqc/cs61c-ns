@@ -491,7 +491,7 @@ class JointParticleFilter:
         p = list(p)
         for i in range(self.numGhosts):
             if noisyDistances[i] == None:
-                p[i] = self.getJailPosition()
+                p[i] = self.getJailPosition(i)
         self.newParticles.append(tuple(p))
     self.particles = self.newParticles        
   
