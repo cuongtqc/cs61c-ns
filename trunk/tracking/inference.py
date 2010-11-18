@@ -472,9 +472,10 @@ class JointParticleFilter:
     for p in xrange(self.numParticles):
       weight = 1
       for i in xrange(self.numGhosts):
-          trueDistance = util.manhattanDistance(self.particles[p][i], pacmanPosition)
-          emissionModel = emissionModels[i]
-          if emissionModel[trueDistance] > 0:
+          if noisyDistances[i]:
+              trueDistance = util.manhattanDistance(self.particles[p][i], pacmanPosition)
+              emissionModel = emissionModels[i]
+              #if emissionModel[trueDistance] > 0:
               weight *= emissionModel[trueDistance]
       allPossible[self.particles[p]] += weight
     allPossible.normalize()
