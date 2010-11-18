@@ -366,12 +366,16 @@ class JointParticleFilter:
     "Initializes particles randomly.  Each particle is a tuple of ghost positions. Use self.numParticles for the number of particles"
     "*** YOUR CODE HERE ***"
     legalpos = self.legalPositions
-    
-    self.particles = util.Counter()
+
+    self.particles = []
     for i in xrange(0,self.numParticles):
-        self.particles[random.choice(legalpos)] += 1
+        ghostTuple = []
+        for i in range(self.numGhosts):
+            ghostTuple.append(random.choice(legalpos))
+        ghostTuple = tuple(ghostTuple)
+        self.particles.append(ghostTuple)
         #print self.particles
-    self.particles.normalize()
+    #self.particles.normalize()
 
   def addGhostAgent(self, agent):
     "Each ghost agent is registered separately and stored (in case they are different)."
@@ -420,9 +424,15 @@ class JointParticleFilter:
     newParticles = []
     for oldParticle in self.particles:
       newParticle = list(oldParticle) # A list of ghost positions
-      "*** YOUR CODE HERE ***"
+      prevGhostPositions = list(oldParticle)
+      for i in range(self.numGhosts):
+          #print self.ghostAgents
+          #print i,newParticle,oldParticle,prevGhostPositions
+          newPosDist = getPositionDistributionForGhost(setGhostPositions(gameState, prevGhostPositions),
+                                                   i, self.ghostAgents[i])
+          newParticle[i] = util.sampleFromCounter(newPosDist)
       newParticles.append(tuple(newParticle))
-    self.particles = newParticles
+    self.particles = newParticles  
 
   def getJailPosition(self, i):
     return (2 * i + 1, 1);
@@ -482,8 +492,10 @@ def getPositionDistributionForGhost(gameState, ghostIndex, agent):
   
 def setGhostPositions(gameState, ghostPositions):
   "Sets the position of all ghosts to the values in ghostPositionTuple."
+  #print ghostPositions
   for index, pos in enumerate(ghostPositions):
     conf = game.Configuration(pos, game.Directions.STOP)
+    #print index,pos,gameState.data.agentStates
     gameState.data.agentStates[index + 1] = game.AgentState(conf, False)
   return gameState  
 
