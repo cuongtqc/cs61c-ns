@@ -277,7 +277,11 @@ class ParticleFilter(InferenceModule):
                 allPossible[p] = 1.0
             else:
                 allPossible[p] = 0.0
-    self.particles = allPossible        
+    allPossible.normalize()            
+    self.particles = util.Counter()
+    for i in xrange(0,self.numParticles):
+        self.particles[util.sampleFromCounter(allPossible)] +=1
+    self.particles.normalize()            
     #print len(self.particles.keys())
     #print len(self.legalPositions)
     #print self.particles.totalCount()
