@@ -227,8 +227,11 @@ class ParticleFilter(InferenceModule):
     self.particles = util.Counter()
     for i in xrange(0,self.numParticles):
         self.particles[random.choice(legalpos)] += 1
+        #print self.particles
     self.particles.normalize()
-  
+    #print len(self.particles.keys())
+    #print len(self.legalPositions)
+      
   def observe(self, observation, gameState):
     """
     Update beliefs based on the given distance observation. Make
@@ -261,7 +264,7 @@ class ParticleFilter(InferenceModule):
     allPossible = util.Counter()
     #for x in xrange(0,self.numParticles):
     #  p = util.sampleFromCounter(self.particles)
-    for p in self.particles:
+    for p in self.legalPositions:
       trueDistance = util.manhattanDistance(p, pacmanPosition)
       if emissionModel[trueDistance] > 0:
           allPossible[p] = emissionModel[trueDistance]*self.particles[p]
@@ -275,7 +278,8 @@ class ParticleFilter(InferenceModule):
             else:
                 allPossible[p] = 0.0
     self.particles = allPossible        
-    
+    #print len(self.particles.keys())
+    #print len(self.legalPositions)
     
   def elapseTime(self, gameState):
     """
@@ -311,7 +315,8 @@ class ParticleFilter(InferenceModule):
     ghost locations conditioned on all evidence and time passage.
     """
     "*** YOUR CODE HERE ***"
-    print self.particles
+    #print len(self.particles.keys())
+    
     return self.particles
 
 class MarginalInference(InferenceModule):
