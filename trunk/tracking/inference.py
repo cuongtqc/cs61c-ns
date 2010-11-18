@@ -478,6 +478,22 @@ class JointParticleFilter:
               weight *= emissionModel[trueDistance]
       allPossible[self.particles[p]] += weight
     allPossible.normalize()
+
+    self.particles = []
+    if allPossible.totalCount() == 0:
+        self.initializeUniformly(self.numParticles)
+    else:
+        for i in xrange(self.numParticles):
+            self.particles.append(util.sampleFromCounter(allPossible))
+    
+    self.newParticles = []
+    for p in self.particles:
+        p = list(p)
+        for i in range(self.numGhosts):
+            if noisyDistances[i] == None:
+                p[i] = self.getJailPosition()
+        self.newParticles.append(tuple(p))
+    self.particles = self.newParticles        
   
   def getBeliefDistribution(self):
     dist = util.Counter()
