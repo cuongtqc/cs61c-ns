@@ -189,7 +189,7 @@ class ExactInference(InferenceModule):
     """
     
     "*** YOUR CODE HERE ***"
-    allPossible = self.beliefs
+    allPossible = util.Counter()
     for p in self.legalPositions:
         oldPos = p
         newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
@@ -280,6 +280,7 @@ class ParticleFilter(InferenceModule):
     self.particles = allPossible        
     #print len(self.particles.keys())
     #print len(self.legalPositions)
+    #print self.particles.totalCount()
     
   def elapseTime(self, gameState):
     """
@@ -294,7 +295,7 @@ class ParticleFilter(InferenceModule):
     position.
     """
     "*** YOUR CODE HERE ***"
-    allPossible = self.particles
+    allPossible = util.Counter()
     #for x in xrange(0,self.numParticles):
     #    p = util.sampleFromCounter(self.particles)
     
@@ -303,11 +304,13 @@ class ParticleFilter(InferenceModule):
         newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
         for newPos, prob in newPosDist.items():
          #   pass
-            allPossible[newPos] += prob*self.particles[oldPos]
+         #print len(allPossible)
+         allPossible[newPos] += prob*self.particles[oldPos]
     allPossible.normalize()
     self.particles = allPossible
-    
-    
+    #print self.particles.totalCount()
+    #print len(self.particles.keys())
+    #print len(self.legalPositions)    
 
   def getBeliefDistribution(self):
     """
@@ -362,7 +365,13 @@ class JointParticleFilter:
   def initializeParticles(self):
     "Initializes particles randomly.  Each particle is a tuple of ghost positions. Use self.numParticles for the number of particles"
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    legalpos = self.legalPositions
+    
+    self.particles = util.Counter()
+    for i in xrange(0,self.numParticles):
+        self.particles[random.choice(legalpos)] += 1
+        #print self.particles
+    self.particles.normalize()
 
   def addGhostAgent(self, agent):
     "Each ghost agent is registered separately and stored (in case they are different)."
